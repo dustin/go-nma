@@ -9,12 +9,13 @@ import (
 	"github.com/dustin/nma.go"
 )
 
-var apikey, event, url string
+var apikey, event, application string
 var priority int
 
 func init() {
 	flag.StringVar(&apikey, "apikey", "", "Your API key")
 	flag.StringVar(&event, "event", "", "NMA event")
+	flag.StringVar(&application, "application", "", "Notifying application")
 	flag.IntVar(&priority, "pri", 0, "NMA priority (-2 to 2)")
 }
 
@@ -25,6 +26,7 @@ func main() {
 
 	e := nma.Notification{
 		Description: strings.Join(flag.Args(), " "),
+		Application: application,
 		Event:       event,
 		Priority:    priority,
 	}
