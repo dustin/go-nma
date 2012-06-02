@@ -1,0 +1,7 @@
+#*
+*.6
+*~
+/6.out
+/_obj/
+/_test/
+/example/example
