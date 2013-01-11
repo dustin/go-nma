@@ -31,11 +31,17 @@ type Notification struct {
 type NMA struct {
 	apiKey       []string
 	developerKey string
+	client       *http.Client
 }
 
 // Get a new NMA object with the given apiKey
 func New(apiKey string) *NMA {
-	return &NMA{apiKey: []string{apiKey}}
+	return NewWithClient(apiKey, http.DefaultClient)
+}
+
+// Get a new NMA object with the given apiKey and http.Client
+func NewWithClient(apiKey string, client *http.Client) *NMA {
+	return &NMA{apiKey: []string{apiKey}, client: client}
 }
 
 // Add an API key to the list to try.
@@ -83,7 +89,7 @@ func (nma *NMA) handleResponse(def string, r io.Reader) error {
 func (nma *NMA) Verify() (err error) {
 	vals := url.Values{"apikey": {strings.Join(nma.apiKey, ",")}}
 	var r *http.Response
-	r, err = http.Get(NOTIFY_URL + "?" + vals.Encode())
+	r, err = nma.client.Get(NOTIFY_URL + "?" + vals.Encode())
 	if err == nil {
 		defer r.Body.Close()
 		err = nma.handleResponse(r.Status, r.Body)
@@ -101,7 +107,7 @@ func (nma *NMA) Notify(n *Notification) (err error) {
 		"event":       {n.Event},
 	}
 
-	r, err := http.PostForm(NOTIFY_URL, vals)
+	r, err := nma.client.PostForm(NOTIFY_URL, vals)
 
 	if err != nil {
 		return
