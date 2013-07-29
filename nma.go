@@ -111,9 +111,8 @@ func (nma *NMA) Notify(n *Notification) (err error) {
 
 	if err != nil {
 		return
-	} else {
-		defer r.Body.Close()
-		err = nma.handleResponse(r.Status, r.Body)
 	}
-	return
+
+	defer r.Body.Close()
+	return nma.handleResponse(r.Status, r.Body)
 }
