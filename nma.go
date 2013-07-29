@@ -49,6 +49,11 @@ func (nma *NMA) AddKey(apiKey string) {
 	nma.apiKey = append(nma.apiKey, apiKey)
 }
 
+// Sets the Developer key for the NMA object
+func (nma *NMA) SetDeveloperKey(devKey string) {
+	nma.developerKey = devKey
+}
+
 type response struct {
 	Err *struct {
 		Code       int    `xml:"code,attr"`
@@ -89,6 +94,10 @@ func (nma *NMA) handleResponse(def string, r io.Reader) error {
 func (nma *NMA) Verify(apikey string) (err error) {
 	vals := url.Values{"apikey": {apikey}}
 
+	if nma.developerKey != "" {
+		vals["developerkey"] = []string{nma.developerKey}
+	}
+
 	var r *http.Response
 	r, err = nma.client.Get(VERIFY_URL + "?" + vals.Encode())
 	if err == nil {
@@ -106,6 +115,10 @@ func (nma *NMA) Notify(n *Notification) (err error) {
 		"application": {n.Application},
 		"description": {n.Description},
 		"event":       {n.Event},
+	}
+
+	if nma.developerKey != "" {
+		vals["developerkey"] = []string{nma.developerKey}
 	}
 
 	r, err := nma.client.PostForm(NOTIFY_URL, vals)
