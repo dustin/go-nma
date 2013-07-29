@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -21,11 +22,21 @@ const (
 	NOTIFY_URL = API_SERVER + NOTIFY_PATH
 )
 
+type PriorityLevel int
+
+const (
+	PRIORITY_VERYLOW   PriorityLevel = -2
+	PRIORITY_MODERATE                = -1
+	PRIORITY_NORMAL                  = 0
+	PRIORITY_HIGH                    = 1
+	PRIORITY_EMERGENCY               = 2
+)
+
 type Notification struct {
 	Application string
 	Description string
 	Event       string
-	Priority    int
+	Priority    PriorityLevel
 }
 
 type NMA struct {
@@ -115,6 +126,10 @@ func (nma *NMA) Notify(n *Notification) (err error) {
 		"application": {n.Application},
 		"description": {n.Description},
 		"event":       {n.Event},
+	}
+
+	if n.Priority != 0 {
+		vals["priority"] = []string{strconv.Itoa(int(n.Priority))}
 	}
 
 	if nma.developerKey != "" {
