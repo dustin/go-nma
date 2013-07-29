@@ -86,8 +86,9 @@ func (nma *NMA) handleResponse(def string, r io.Reader) error {
 }
 
 // Verify your credentials.
-func (nma *NMA) Verify() (err error) {
-	vals := url.Values{"apikey": {strings.Join(nma.apiKey, ",")}}
+func (nma *NMA) Verify(apikey string) (err error) {
+	vals := url.Values{"apikey": {apikey}}
+
 	var r *http.Response
 	r, err = nma.client.Get(NOTIFY_URL + "?" + vals.Encode())
 	if err == nil {
