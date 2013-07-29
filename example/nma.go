@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/dustin/nma.go"
+	"github.com/dustin/go-nma"
 )
 
 var apikey, event, application string

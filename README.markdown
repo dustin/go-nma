@@ -7,14 +7,14 @@ and other android devices quickly and easily.
 
 ## Installation
 
-`go get github.com/dustin/nma.go`
+`go get github.com/dustin/go-nma`
 
 ## Usage
 
 ```go
 package main
 
-import "github.com/dustin/nma.go"
+import "github.com/dustin/go-nma"
 
 func main() {
     n := nma.New("yourapikey")
