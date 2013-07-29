@@ -28,7 +28,7 @@ func main() {
 		Description: strings.Join(flag.Args(), " "),
 		Application: application,
 		Event:       event,
-		Priority:    priority,
+		Priority:    nma.PriorityLevel(priority),
 	}
 
 	if err := n.Notify(&e); err != nil {
