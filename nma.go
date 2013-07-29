@@ -90,7 +90,7 @@ func (nma *NMA) Verify(apikey string) (err error) {
 	vals := url.Values{"apikey": {apikey}}
 
 	var r *http.Response
-	r, err = nma.client.Get(NOTIFY_URL + "?" + vals.Encode())
+	r, err = nma.client.Get(VERIFY_URL + "?" + vals.Encode())
 	if err == nil {
 		defer r.Body.Close()
 		err = nma.handleResponse(r.Status, r.Body)
