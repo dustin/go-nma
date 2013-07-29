@@ -32,11 +32,20 @@ const (
 	PRIORITY_EMERGENCY               = 2
 )
 
+type ContentType string
+
+const (
+	CONTENT_TYPE_HTML ContentType = "text/html"
+	CONTENT_TYPE_TEXT             = "text/plain"
+)
+
 type Notification struct {
 	Application string
 	Description string
 	Event       string
 	Priority    PriorityLevel
+	URL         string
+	ContentType ContentType
 }
 
 type NMA struct {
@@ -130,6 +139,14 @@ func (nma *NMA) Notify(n *Notification) (err error) {
 
 	if n.Priority != 0 {
 		vals["priority"] = []string{strconv.Itoa(int(n.Priority))}
+	}
+
+	if n.URL != "" {
+		vals["url"] = []string{n.URL}
+	}
+
+	if n.ContentType != "" {
+		vals["content-type"] = []string{string(n.ContentType)}
 	}
 
 	if nma.developerKey != "" {
