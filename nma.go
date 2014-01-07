@@ -5,7 +5,6 @@ package nma
 
 import (
 	"encoding/xml"
-	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -91,9 +90,9 @@ func (e *response) Error() string {
 	return e.Err.Message
 }
 
-func decodeResponse(def string, r io.Reader) (xres response, err error) {
-	if xml.NewDecoder(r).Decode(&xres) != nil {
-		err = errors.New(def)
+func decodeResponse(r io.Reader) (xres response, err error) {
+	if err = xml.NewDecoder(r).Decode(&xres); err != nil {
+		return response{}, err
 	} else {
 		if xres.Err != nil {
 			err = &xres
@@ -103,7 +102,7 @@ func decodeResponse(def string, r io.Reader) (xres response, err error) {
 }
 
 func (nma *NMA) handleResponse(def string, r io.Reader) error {
-	_, err := decodeResponse(def, r)
+	_, err := decodeResponse(r)
 	if err != nil {
 		// Fill response stuff here.
 	}
