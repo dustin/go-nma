@@ -1,4 +1,4 @@
-// NotifyMyAndroid client for go.
+// Package nma is a NotifyMyAndroid client for go.
 //
 // See https://www.notifymyandroid.com/api.jsp for API details.
 package nma
@@ -13,16 +13,18 @@ import (
 )
 
 const (
-	API_SERVER  = "https://www.notifymyandroid.com"
-	VERIFY_PATH = "/publicapi/verify"
-	NOTIFY_PATH = "/publicapi/notify"
+	apiServer  = "https://www.notifymyandroid.com"
+	verifyPath = "/publicapi/verify"
+	notifyPath = "/publicapi/notify"
 
-	VERIFY_URL = API_SERVER + VERIFY_PATH
-	NOTIFY_URL = API_SERVER + NOTIFY_PATH
+	verifyURL = apiServer + verifyPath
+	notifyURL = apiServer + notifyPath
 )
 
+// PriorityLevel defines the priority of a notification.
 type PriorityLevel int
 
+// Priority levels
 const (
 	PRIORITY_VERYLOW   PriorityLevel = -2
 	PRIORITY_MODERATE                = -1
@@ -31,13 +33,16 @@ const (
 	PRIORITY_EMERGENCY               = 2
 )
 
+// ContentType specifies the content type of a message.
 type ContentType string
 
+// Available content types
 const (
 	CONTENT_TYPE_HTML ContentType = "text/html"
 	CONTENT_TYPE_TEXT             = "text/plain"
 )
 
+// A Notification contains all the information to deliver.
 type Notification struct {
 	Application string
 	Description string
@@ -47,28 +52,30 @@ type Notification struct {
 	ContentType ContentType
 }
 
+// NMA is the entry point for all API calls.
 type NMA struct {
 	apiKey       []string
 	developerKey string
 	client       *http.Client
 }
 
-// Get a new NMA object with the given apiKey
+// New gets a new NMA object with the given apiKey
 func New(apiKey string) *NMA {
 	return NewWithClient(apiKey, http.DefaultClient)
 }
 
-// Get a new NMA object with the given apiKey and http.Client
+// NewWithClient gets a new NMA object with the given apiKey and
+// http.Client
 func NewWithClient(apiKey string, client *http.Client) *NMA {
 	return &NMA{apiKey: []string{apiKey}, client: client}
 }
 
-// Add an API key to the list to try.
+// AddKey adds an API key to the list to try.
 func (nma *NMA) AddKey(apiKey string) {
 	nma.apiKey = append(nma.apiKey, apiKey)
 }
 
-// Sets the Developer key for the NMA object
+// SetDeveloperKey sets the Developer key for the NMA object
 func (nma *NMA) SetDeveloperKey(devKey string) {
 	nma.developerKey = devKey
 }
@@ -93,10 +100,9 @@ func (e *response) Error() string {
 func decodeResponse(r io.Reader) (xres response, err error) {
 	if err = xml.NewDecoder(r).Decode(&xres); err != nil {
 		return response{}, err
-	} else {
-		if xres.Err != nil {
-			err = &xres
-		}
+	}
+	if xres.Err != nil {
+		err = &xres
 	}
 	return
 }
@@ -118,7 +124,7 @@ func (nma *NMA) Verify(apikey string) (err error) {
 	}
 
 	var r *http.Response
-	r, err = nma.client.Get(VERIFY_URL + "?" + vals.Encode())
+	r, err = nma.client.Get(verifyURL + "?" + vals.Encode())
 	if err == nil {
 		defer r.Body.Close()
 		err = nma.handleResponse(r.Status, r.Body)
@@ -126,7 +132,7 @@ func (nma *NMA) Verify(apikey string) (err error) {
 	return
 }
 
-// Send a notification.
+// Notify sends a notification.
 func (nma *NMA) Notify(n *Notification) (err error) {
 
 	vals := url.Values{
@@ -152,7 +158,7 @@ func (nma *NMA) Notify(n *Notification) (err error) {
 		vals["developerkey"] = []string{nma.developerKey}
 	}
 
-	r, err := nma.client.PostForm(NOTIFY_URL, vals)
+	r, err := nma.client.PostForm(notifyURL, vals)
 
 	if err != nil {
 		return
