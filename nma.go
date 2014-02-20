@@ -26,11 +26,11 @@ type PriorityLevel int
 
 // Priority levels
 const (
-	PRIORITY_VERYLOW   PriorityLevel = -2
-	PRIORITY_MODERATE                = -1
-	PRIORITY_NORMAL                  = 0
-	PRIORITY_HIGH                    = 1
-	PRIORITY_EMERGENCY               = 2
+	VeryLow   PriorityLevel = -2
+	Moderate                = -1
+	Normal                  = 0
+	High                    = 1
+	Emergency               = 2
 )
 
 // ContentType specifies the content type of a message.
@@ -38,8 +38,8 @@ type ContentType string
 
 // Available content types
 const (
-	CONTENT_TYPE_HTML ContentType = "text/html"
-	CONTENT_TYPE_TEXT             = "text/plain"
+	ContentTypeHTML ContentType = "text/html"
+	ContentTypeText             = "text/plain"
 )
 
 // A Notification contains all the information to deliver.
