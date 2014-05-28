@@ -1,6 +1,7 @@
 package nma
 
 import (
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
@@ -26,16 +27,23 @@ func TestErrorParsing(t *testing.T) {
 	}
 }
 
+func hres(status int, s string) *http.Response {
+	return &http.Response{
+		StatusCode: status,
+		Body:       ioutil.NopCloser(strings.NewReader(s)),
+	}
+}
+
 func TestErrorResponseParsing(t *testing.T) {
 	n := &NMA{}
 	expected := "Parameter 'apikey' not provided."
 
-	err := n.handleResponse("", strings.NewReader(verifySampleError))
+	err := n.handleResponse(hres(200, verifySampleError))
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected ``%s'', got ``%v''", expected, err)
 	}
 
-	err = n.handleResponse("", strings.NewReader("<3"))
+	err = n.handleResponse(hres(200, "<3"))
 	if err == nil {
 		t.Errorf("Expected error parsing invalid xml")
 	}

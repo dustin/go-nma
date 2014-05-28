@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/dustin/httputil"
 )
 
 const (
@@ -107,8 +109,11 @@ func decodeResponse(r io.Reader) (xres response, err error) {
 	return
 }
 
-func (nma *NMA) handleResponse(def string, r io.Reader) error {
-	_, err := decodeResponse(r)
+func (nma *NMA) handleResponse(res *http.Response) error {
+	if res.StatusCode > 300 || res.StatusCode < 200 {
+		return httputil.HTTPError(res)
+	}
+	_, err := decodeResponse(res.Body)
 	if err != nil {
 		// Fill response stuff here.
 	}
@@ -116,20 +121,19 @@ func (nma *NMA) handleResponse(def string, r io.Reader) error {
 }
 
 // Verify your credentials.
-func (nma *NMA) Verify(apikey string) (err error) {
+func (nma *NMA) Verify(apikey string) error {
 	vals := url.Values{"apikey": {apikey}}
 
 	if nma.developerKey != "" {
 		vals["developerkey"] = []string{nma.developerKey}
 	}
 
-	var r *http.Response
-	r, err = nma.client.Get(verifyURL + "?" + vals.Encode())
-	if err == nil {
-		defer r.Body.Close()
-		err = nma.handleResponse(r.Status, r.Body)
+	r, err := nma.client.Get(verifyURL + "?" + vals.Encode())
+	if err != nil {
+		return err
 	}
-	return
+	defer r.Body.Close()
+	return nma.handleResponse(r)
 }
 
 // Notify sends a notification.
@@ -165,5 +169,5 @@ func (nma *NMA) Notify(n *Notification) (err error) {
 	}
 
 	defer r.Body.Close()
-	return nma.handleResponse(r.Status, r.Body)
+	return nma.handleResponse(r)
 }
