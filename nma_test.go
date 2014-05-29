@@ -29,6 +29,7 @@ func TestErrorParsing(t *testing.T) {
 
 func hres(status int, s string) *http.Response {
 	return &http.Response{
+		Status:     http.StatusText(status),
 		StatusCode: status,
 		Body:       ioutil.NopCloser(strings.NewReader(s)),
 	}
@@ -39,6 +40,12 @@ func TestErrorResponseParsing(t *testing.T) {
 	expected := "Parameter 'apikey' not provided."
 
 	err := n.handleResponse(hres(200, verifySampleError))
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected ``%s'', got ``%v''", expected, err)
+	}
+
+	expected = "HTTP Error Bad Request - you wrong"
+	err = n.handleResponse(hres(400, "you wrong"))
 	if err == nil || err.Error() != expected {
 		t.Errorf("Expected ``%s'', got ``%v''", expected, err)
 	}
