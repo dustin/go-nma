@@ -1,6 +1,7 @@
 package nma
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -84,5 +85,46 @@ func TestSetup(t *testing.T) {
 	}
 	if n.client != http.DefaultClient {
 		t.Errorf("Incorrect client: %v", http.DefaultClient)
+	}
+}
+
+type staticRoundTripper struct {
+	res *http.Response
+}
+
+func (s staticRoundTripper) RoundTrip(*http.Request) (*http.Response, error) {
+	return s.res, nil
+}
+
+func testClient(res *http.Response) *http.Client {
+	return &http.Client{Transport: staticRoundTripper{res}}
+}
+
+type failingRoundTripper struct{}
+
+func (failingRoundTripper) RoundTrip(*http.Request) (*http.Response, error) {
+	return nil, errors.New("nope")
+}
+
+func TestVerify(t *testing.T) {
+	n := New("aqui")
+	n.SetDeveloperKey("dk")
+
+	// Success case
+	n.client = testClient(hres(200, verifySampleSuccess))
+	if err := n.Verify("k"); err != nil {
+		t.Errorf("Failed verifying: %v", err)
+	}
+
+	// Error case
+	n.client = testClient(hres(400, verifySampleError))
+	if err := n.Verify("k"); err == nil {
+		t.Errorf("Expected error, but passed :(")
+	}
+
+	// Hard error case
+	n.client = &http.Client{Transport: failingRoundTripper{}}
+	if err := n.Verify("k"); err == nil {
+		t.Errorf("Expected error, but passed :(")
 	}
 }
