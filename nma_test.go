@@ -146,6 +146,12 @@ func TestNotify(t *testing.T) {
 		t.Errorf("Failed a notification: %v", err)
 	}
 
+	// Soft failure case
+	n.client = testClient(hres(400, verifySampleError))
+	if err := n.Notify(&Notification{}); err == nil {
+		t.Errorf("Expected to fail a notification, but succeed")
+	}
+
 	// Hard failure case
 	n.client = &http.Client{Transport: failingRoundTripper{}}
 	if err := n.Notify(&Notification{
