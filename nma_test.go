@@ -128,3 +128,34 @@ func TestVerify(t *testing.T) {
 		t.Errorf("Expected error, but passed :(")
 	}
 }
+
+func TestNotify(t *testing.T) {
+	n := New("aqui")
+	n.SetDeveloperKey("dk")
+
+	// Success case
+	n.client = testClient(hres(200, verifySampleSuccess))
+	if err := n.Notify(&Notification{
+		Application: "test",
+		Description: "A thing",
+		Event:       "tested",
+		Priority:    High,
+		URL:         "http://www.spy.net/",
+		ContentType: ContentTypeText,
+	}); err != nil {
+		t.Errorf("Failed a notification: %v", err)
+	}
+
+	// Hard failure case
+	n.client = &http.Client{Transport: failingRoundTripper{}}
+	if err := n.Notify(&Notification{
+		Application: "test",
+		Description: "A thing",
+		Event:       "tested",
+		Priority:    High,
+		URL:         "http://www.spy.net/",
+		ContentType: ContentTypeText,
+	}); err == nil {
+		t.Errorf("Expected to fail a notification, but succeed")
+	}
+}
